@@ -3,11 +3,13 @@ Validation service orchestration
 """
 from src.core.validator import ValidationEngine
 from src.core.parser.glsl_parser import GLSLParser
+from src.core.parsers.isf_parser import ISFParser
 from src.core.analyzers.logic_analyzer import LogicFlowAnalyzer, DataFlowAnalyzer, MathematicalValidator
 from src.core.analyzers.portability_analyzer import PortabilityAnalyzer, CrossPlatformValidator
 from src.core.analyzers.quality_analyzer import QualityAnalyzer
 from src.core.analyzers.syntax_analyzer import SyntaxAnalyzer
 from src.core.analyzers.semantic_analyzer import SemanticAnalyzer
+from src.core.analyzers.isf_analyzer import ISFAnalyzer
 from src.core.utils.gl_utils import GLVersionDetector, GLSLFeatureChecker, GLPlatformUtils
 from src.core.models.errors import ValidationResult, ValidationError, ErrorSeverity
 from typing import Dict, Any, Optional, List
@@ -29,6 +31,11 @@ class ValidationService:
         self.portability_analyzer = PortabilityAnalyzer()
         self.cross_platform_validator = CrossPlatformValidator()
         self.quality_analyzer = QualityAnalyzer()
+        self.isf_analyzer = ISFAnalyzer()
+        
+        # Initialize parsers
+        self.glsl_parser = GLSLParser("")
+        self.isf_parser = ISFParser()
         
         # Initialize GL utilities
         self.version_detector = GLVersionDetector()
@@ -62,36 +69,11 @@ class ValidationService:
         }
         
         try:
-            # Parse the shader
+            # Parse and validate based on format
             if format_name.lower() == "glsl":
-                ast_result = self._parse_glsl(code)
-                if not ast_result["success"]:
-                    result["is_valid"] = False
-                    result["errors"].extend(ast_result["errors"])
-                    return result
-                
-                ast_root = ast_result["ast"]
-                
-                # Perform comprehensive analysis
-                self._perform_syntax_analysis(ast_root, result)
-                self._perform_semantic_analysis(ast_root, result)
-                self._perform_logic_analysis(ast_root, result)
-                self._perform_data_flow_analysis(ast_root, result)
-                self._perform_mathematical_validation(ast_root, result)
-                
-                if enable_portability_analysis:
-                    self._perform_portability_analysis(ast_root, result, target_version, target_platforms)
-                
-                if enable_quality_analysis:
-                    self._perform_quality_analysis(ast_root, result)
-                
-                # Check for any critical errors
-                if result["errors"]:
-                    result["is_valid"] = False
-                
-                # Generate overall recommendations
-                result["recommendations"] = self._generate_recommendations(result)
-                
+                result = self._validate_glsl(code, result, parameters)
+            elif format_name.lower() == "isf":
+                result = self._validate_isf(code, result, parameters)
             else:
                 # For other formats, use the validation engine
                 engine_result = self.engine.validate_shader(code, format_name, parameters)
@@ -105,6 +87,132 @@ class ValidationService:
                 "column": 0,
                 "severity": "error",
                 "error_code": "VALIDATION_ERROR"
+            })
+        
+        return result
+    
+    def _validate_glsl(self, code: str, result: Dict[str, Any], parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate GLSL shader."""
+        # Parse the shader
+        ast_result = self._parse_glsl(code)
+        if not ast_result["success"]:
+            result["is_valid"] = False
+            result["errors"].extend(ast_result["errors"])
+            return result
+        
+        ast_root = ast_result["ast"]
+        
+        # Perform comprehensive analysis
+        self._perform_syntax_analysis(ast_root, result)
+        self._perform_semantic_analysis(ast_root, result)
+        self._perform_logic_analysis(ast_root, result)
+        self._perform_data_flow_analysis(ast_root, result)
+        self._perform_mathematical_validation(ast_root, result)
+        
+        if parameters.get("enable_portability_analysis", True):
+            self._perform_portability_analysis(ast_root, result, 
+                                             parameters.get("target_version", "330"), 
+                                             parameters.get("target_platforms", ["desktop", "mobile", "web"]))
+        
+        if parameters.get("enable_quality_analysis", True):
+            self._perform_quality_analysis(ast_root, result)
+        
+        # Check for any critical errors
+        if result["errors"]:
+            result["is_valid"] = False
+        
+        # Generate overall recommendations
+        result["recommendations"] = self._generate_recommendations(result)
+        
+        return result
+    
+    def _validate_isf(self, isf_json: str, result: Dict[str, Any], parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate ISF shader."""
+        try:
+            # Perform ISF-specific analysis
+            isf_result = self.isf_analyzer.analyze(isf_json)
+            
+            # Convert ISF validation errors to our format
+            for error in isf_result.get("errors", []):
+                result["errors"].append({
+                    "message": error.message,
+                    "line": error.line,
+                    "column": error.column,
+                    "severity": error.severity.value,
+                    "error_code": error.error_code,
+                    "suggestions": error.suggestions
+                })
+            
+            for warning in isf_result.get("warnings", []):
+                result["warnings"].append({
+                    "message": warning.message,
+                    "line": warning.line,
+                    "column": warning.column,
+                    "severity": warning.severity.value,
+                    "error_code": warning.error_code,
+                    "suggestions": warning.suggestions
+                })
+            
+            # Add ISF metadata
+            if "metadata" in isf_result and "parsed_document" in isf_result["metadata"]:
+                isf_doc = isf_result["metadata"]["parsed_document"]
+                result["metadata"] = {
+                    "name": isf_doc.name,
+                    "description": isf_doc.description,
+                    "author": isf_doc.author,
+                    "version": isf_doc.version,
+                    "categories": isf_doc.categories,
+                    "parameters": [{
+                        "name": param.name,
+                        "type": param.type.value,
+                        "default_value": param.default_value
+                    } for param in (isf_doc.parameters or [])],
+                    "passes": [{
+                        "target": pass_obj.target,
+                        "persistent": pass_obj.persistent,
+                        "float": pass_obj.float
+                    } for pass_obj in (isf_doc.passes or [])]
+                }
+            
+            # If ISF has fragment shader, also validate it as GLSL
+            if (isf_result.get("metadata", {}).get("parsed_document") and 
+                isf_result["metadata"]["parsed_document"].fragment_shader):
+                
+                fragment_shader = isf_result["metadata"]["parsed_document"].fragment_shader
+                glsl_result = self._validate_glsl(fragment_shader, {
+                    "is_valid": True,
+                    "format": "glsl",
+                    "errors": [],
+                    "warnings": [],
+                    "info": []
+                }, parameters)
+                
+                # Merge GLSL validation results
+                result["errors"].extend(glsl_result["errors"])
+                result["warnings"].extend(glsl_result["warnings"])
+                result["info"].extend(glsl_result["info"])
+                
+                if "quality_metrics" in glsl_result:
+                    result["quality_metrics"].update(glsl_result["quality_metrics"])
+                
+                if "performance_analysis" in glsl_result:
+                    result["performance_analysis"].update(glsl_result["performance_analysis"])
+            
+            # Check for any critical errors
+            if result["errors"]:
+                result["is_valid"] = False
+            
+            # Generate ISF-specific recommendations
+            result["recommendations"] = self._generate_isf_recommendations(isf_result)
+            
+        except Exception as e:
+            result["is_valid"] = False
+            result["errors"].append({
+                "message": f"ISF validation failed: {str(e)}",
+                "line": 0,
+                "column": 0,
+                "severity": "error",
+                "error_code": "ISF_VALIDATION_ERROR"
             })
         
         return result
@@ -344,6 +452,35 @@ class ValidationService:
         
         # Remove duplicates and return
         return list(set(recommendations))
+    
+    def _generate_isf_recommendations(self, isf_result: Dict[str, Any]) -> List[str]:
+        """Generate ISF-specific recommendations."""
+        recommendations = []
+        
+        # Check for missing metadata
+        if "metadata" in isf_result and "parsed_document" in isf_result["metadata"]:
+            isf_doc = isf_result["metadata"]["parsed_document"]
+            
+            if not isf_doc.description:
+                recommendations.append("Add a description to help users understand the shader")
+            
+            if not isf_doc.author:
+                recommendations.append("Add author information for attribution")
+            
+            if not isf_doc.categories:
+                recommendations.append("Add categories to help users find the shader")
+            
+            if not isf_doc.parameters:
+                recommendations.append("Consider adding parameters to make the shader more interactive")
+        
+        # Check for validation issues
+        if isf_result.get("errors"):
+            recommendations.append("Fix validation errors before using the shader")
+        
+        if isf_result.get("warnings"):
+            recommendations.append("Review warnings to improve shader quality")
+        
+        return recommendations
     
     def validate_batch(self, shaders: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Validate multiple shaders in batch."""

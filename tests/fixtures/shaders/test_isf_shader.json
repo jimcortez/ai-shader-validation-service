@@ -1,0 +1,40 @@
+{
+  "NAME": "Test ISF Shader",
+  "DESCRIPTION": "A simple test ISF shader for validation testing",
+  "AUTHOR": "AI ShaderMaker",
+  "VERSION": "1.0.0",
+  "CATEGORIES": ["Test", "Simple"],
+  "INPUTS": [
+    {
+      "NAME": "color",
+      "TYPE": "color",
+      "DEFAULT": [1.0, 0.0, 0.0, 1.0],
+      "LABEL": "Color",
+      "DESCRIPTION": "The color to display"
+    },
+    {
+      "NAME": "intensity",
+      "TYPE": "float",
+      "DEFAULT": 1.0,
+      "MIN": 0.0,
+      "MAX": 2.0,
+      "LABEL": "Intensity",
+      "DESCRIPTION": "Color intensity multiplier"
+    },
+    {
+      "NAME": "enable_effect",
+      "TYPE": "bool",
+      "DEFAULT": true,
+      "LABEL": "Enable Effect",
+      "DESCRIPTION": "Enable or disable the effect"
+    }
+  ],
+  "PASSES": [
+    {
+      "TARGET": "bufferVariableA",
+      "PERSISTENT": true,
+      "FLOAT": false
+    }
+  ],
+  "FRAGMENT_SHADER": "#version 330\n\nuniform vec4 color;\nuniform float intensity;\nuniform bool enable_effect;\n\nvoid main() {\n    vec4 finalColor = color;\n    if (enable_effect) {\n        finalColor.rgb *= intensity;\n    }\n    gl_FragColor = finalColor;\n}"
+} 
