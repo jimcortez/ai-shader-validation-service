@@ -12,6 +12,8 @@ alembic==1.13.1
 opencv-python==4.8.1.78
 pillow==10.1.0
 numpy==1.25.2
+PyOpenGL==3.1.7
+PyOpenGL-accelerate==3.1.7
 
 # Validation and parsing
 # TODO: Add a GLSL parser or custom implementation here
