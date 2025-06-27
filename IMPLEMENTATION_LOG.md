@@ -220,3 +220,47 @@ This log documents the implementation process, summarizing user prompts, require
 - Batch validation endpoint works for multiple shaders
 - Validation history and status endpoints return correct data
 - All endpoints are integrated and available in the running API 
+
+---
+
+## Step 8: C++ Build System Setup
+
+**User Prompts & Requirements:**
+- Proceed with Step 8: C++ Build System Setup from the implementation plan.
+- Requirements: Set up a C++ build system for VVISF-GL integration using CMake and pybind11, create a placeholder for C++ bindings, and ensure the build is integrated into Docker.
+
+**Deviations from Plan:**
+- pybind11 installed via pip does not provide CMake config files; resolved by cloning pybind11 as a submodule and using add_subdirectory in CMake.
+- VVISF-GL integration is scaffolded (not yet linked or built) to allow the build system to work before actual C++ implementation.
+- Several Dockerfile adjustments were needed to ensure all build files and sources are copied before the build step.
+- The C++ build system required at least one valid source file; a minimal pybind11 module was added as a placeholder.
+
+**Implementation Details:**
+- Created/updated `CMakeLists.txt` to use pybind11 as a subdirectory and scaffold VVISF-GL integration.
+- Created `src/bindings/` directory and placeholder C++ source files (`vvisf_bindings.cpp`, `validation_result.cpp`, `image_data.cpp`).
+- Added a minimal pybind11 module definition in `vvisf_bindings.cpp`.
+- Created `scripts/build_cpp.sh` to automate the C++ build with CMake and Make.
+- Updated the Dockerfile to install build tools, clone/copy pybind11, copy all necessary build files, and run the build script during the image build.
+- Rebuilt the Docker container and confirmed the C++/pybind11 build system works as a scaffold.
+
+**Issues Encountered:**
+- CMake could not find pybind11 when installed via pip; resolved by using the official repo as a subdirectory.
+- Docker build context issues required explicit COPY commands for all build files and sources.
+- CMake/pybind11 required at least one valid source file; resolved by adding a minimal module definition.
+
+**Files Created/Modified:**
+- CMakeLists.txt (created/updated)
+- src/bindings/ (created)
+- src/bindings/vvisf_bindings.cpp (created)
+- src/bindings/validation_result.cpp (created)
+- src/bindings/image_data.cpp (created)
+- scripts/build_cpp.sh (created)
+- Dockerfile (updated)
+- external/pybind11/ (added)
+
+**Success Criteria Met:**
+- CMake configuration works and finds pybind11
+- C++ code compiles successfully (minimal module)
+- Build process is automated via script and Docker
+- Docker build includes C++ compilation
+- Scaffold is ready for VVISF-GL integration in the next step 

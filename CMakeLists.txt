@@ -1,45 +1,33 @@
-cmake_minimum_required(VERSION 3.16)
-project(ai-shadermaker-bindings)
+cmake_minimum_required(VERSION 3.15)
+project(ai_shadermaker_bindings LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find Python and pybind11
-find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development)
-find_package(pybind11 REQUIRED)
+# pybind11 (use as subdirectory)
+add_subdirectory(external/pybind11)
 
-# Find VVISF-GL
-find_package(VVISF REQUIRED)
-find_package(VVGL REQUIRED)
+# VVISF-GL (integration will be added in a later step)
+# add_subdirectory(external/VVISF-GL)
+# include_directories(external/VVISF-GL/include)
+# find_package(VVISF REQUIRED)
 
-# Include directories
-include_directories(${VVISF_INCLUDE_DIRS})
-include_directories(${VVGL_INCLUDE_DIRS})
+# Source files
+file(GLOB BINDING_SOURCES src/bindings/*.cpp)
 
 # Create the Python module
-pybind11_add_module(vvisf_engine 
-    src/bindings/vvisf_bindings.cpp
-    src/bindings/validation_result.cpp
-    src/bindings/image_data.cpp
-)
+pybind11_add_module(ai_shadermaker_bindings ${BINDING_SOURCES})
 
 # Link libraries
-target_link_libraries(vvisf_engine 
-    ${VVISF_LIBRARIES}
-    ${VVGL_LIBRARIES}
-    ${OpenGL_LIBRARIES}
-    ${CMAKE_DL_LIBS}
-)
+# target_link_libraries(ai_shadermaker_bindings PRIVATE vvisf-gl)
 
 # Set compiler flags
-target_compile_options(vvisf_engine PRIVATE
+target_compile_options(ai_shadermaker_bindings PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>
     $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra>
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
 # Install the module
-install(TARGETS vvisf_engine
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages
-) 
+install(TARGETS ai_shadermaker_bindings DESTINATION .) 
