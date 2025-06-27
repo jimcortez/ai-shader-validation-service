@@ -6,6 +6,10 @@
 #include <memory>
 #include <stdexcept>
 #include <map>
+// VVISF-GL includes
+#include "external/VVISF-GL/VVISF/include/VVISF.hpp"
+#include "external/VVISF-GL/VVISF/include/ISFDoc.hpp"
+#include "external/VVISF-GL/VVISF/include/ISFRenderer.hpp"
 
 namespace py = pybind11;
 
@@ -63,7 +67,7 @@ public:
     VVISFEngine() : is_initialized_(false) {
         // Initialize VVISF-GL engine
         try {
-            // TODO: Initialize actual VVISF-GL engine
+            // TODO: Initialize actual VVISF-GL
             is_initialized_ = true;
         } catch (const std::exception& e) {
             last_error_ = e.what();
@@ -85,7 +89,7 @@ public:
         }
 
         try {
-            // TODO: Implement actual ISF validation using VVISF-GL
+            // TODO: Use VVISF::ISFDoc and VVISF::ISFRenderer for real ISF validation
             ValidationResult result;
             result.is_valid = true;
             result.errors = {};
@@ -110,7 +114,7 @@ public:
         }
 
         try {
-            // TODO: Implement actual shader rendering using VVISF-GL
+            // TODO: Use VVISF::ISFRenderer for real shader rendering
             ImageData image(width, height);
             image.data = std::vector<uint8_t>(width * height * 4, 255); // RGBA
             return image;

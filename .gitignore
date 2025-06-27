@@ -103,4 +103,9 @@ vvisf-gl/
 
 # Temporary files
 *.tmp
-*.temp 
+*.temp
+
+# Ignore all external libraries except pybind11 and VVISF-GL
+/external/*
+!/external/pybind11
+!/external/VVISF-GL 

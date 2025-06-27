@@ -33,7 +33,11 @@ target_compile_options(ai_shadermaker_bindings PRIVATE
     -O2
 )
 
+# Add VVISF-GL
+add_subdirectory(external/VVISF-GL)
+
 # Link libraries (for future VVISF-GL integration)
-# target_link_libraries(ai_shadermaker_bindings PRIVATE
-#     vvisf_gl
-# ) 
+target_link_libraries(ai_shadermaker_bindings PRIVATE
+    VVGL
+    VVISF
+) 

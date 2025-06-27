@@ -27,9 +27,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install pybind11 (header-only)
 RUN pip install pybind11
 
-# Copy pybind11 for C++ build
-COPY external/pybind11 ./external/pybind11
-
 # Copy CMakeLists.txt for C++ build
 COPY CMakeLists.txt ./CMakeLists.txt
 
@@ -59,4 +56,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/api/v1/health || exit 1
 
 # Run the application
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Copy all external dependencies (pybind11, VVISF-GL, etc.)
+COPY external ./external 
