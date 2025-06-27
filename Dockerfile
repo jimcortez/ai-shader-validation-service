@@ -1,24 +1,28 @@
 FROM python:3.11-slim
 
-# Install system dependencies for OpenGL and graphics
+# Install system dependencies including OpenGL development libraries
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
-    libglu1-mesa \
-    libgles2-mesa \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgomp1 \
-    curl \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
+    libglew-dev \
+    libglfw3-dev \
+    libglm-dev \
     build-essential \
     cmake \
+    make \
+    g++ \
+    curl \
     python3-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
+
+# Copy all external dependencies (pybind11, VVISF-GL, etc.) BEFORE build
+COPY external ./external
 
 # Copy requirements and install Python dependencies
 COPY requirements/requirements.txt .
@@ -30,14 +34,16 @@ RUN pip install pybind11
 # Copy CMakeLists.txt for C++ build
 COPY CMakeLists.txt ./CMakeLists.txt
 
-# Copy C++ bindings source files
+# Copy C++ source files
 COPY src/bindings ./src/bindings
 
-# Build C++ bindings
+# Copy build script
 COPY scripts/build_cpp.sh ./scripts/build_cpp.sh
+
+# Build C++ bindings
 RUN chmod +x ./scripts/build_cpp.sh && ./scripts/build_cpp.sh
 
-# Copy application code
+# Copy application source
 COPY src/ ./src/
 
 # Create necessary directories
@@ -56,7 +62,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/api/v1/health || exit 1
 
 # Run the application
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# Copy all external dependencies (pybind11, VVISF-GL, etc.)
-COPY external ./external 
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"] 

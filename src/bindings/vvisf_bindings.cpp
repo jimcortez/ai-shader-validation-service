@@ -6,10 +6,10 @@
 #include <memory>
 #include <stdexcept>
 #include <map>
-// VVISF-GL includes
-#include "external/VVISF-GL/VVISF/include/VVISF.hpp"
-#include "external/VVISF-GL/VVISF/include/ISFDoc.hpp"
-#include "external/VVISF-GL/VVISF/include/ISFRenderer.hpp"
+// VVISF-GL includes (temporarily disabled)
+// #include "external/VVISF-GL/VVISF/include/VVISF.hpp"
+// #include "external/VVISF-GL/VVISF/include/ISFDoc.hpp"
+// #include "external/VVISF-GL/VVISF/include/ISFRenderer.hpp"
 
 namespace py = pybind11;
 
