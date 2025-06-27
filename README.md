@@ -2,7 +2,10 @@
 
 A comprehensive tool designed to enable AI systems (like Cursor.ai) to validate, analyze, and self-correct shader code across multiple formats including GLSL, ISF (Interactive Shader Format), MadMapper, and other shader variants.
 
+## Warning AI Ahead!
 This is a personal experiment/exploration to generate an entire complex code proect using only AI prompts. Used cursor.ai. See the various markdown documents to track how prompting was done. I tried to use git commits at every step to track the implementation.
+
+This code is not ready for primetime and is almost entirely vibe-coded. You should use and reference at your own risk. Once I have tested this code completely and have it operating, I will remove this message.
 
 ## 🎯 Purpose
 
