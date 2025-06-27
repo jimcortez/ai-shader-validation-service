@@ -20,22 +20,23 @@ After completing each step, write a commit message for the implementation done i
 - Core validation engine framework
 - Database layer and basic API
 
-### Phase 2: Shader Parsing & Validation (Steps 6-10)
+### Phase 2: Shader Parsing & Validation (Steps 6-11)
 - GLSL parser implementation
 - Basic validation logic
 - Error reporting and analysis
+- MadMapper parser and validation
 
-### Phase 3: VVISF-GL Integration (Steps 11-15)
+### Phase 3: VVISF-GL Integration (Steps 12-16)
 - C++ bindings for VVISF-GL
 - ISF parser and validation
 - Native ISF execution
 
-### Phase 4: Visual Analysis & Rendering (Steps 16-20)
+### Phase 4: Visual Analysis & Rendering (Steps 17-21)
 - Shader preview generation
 - Image processing and storage
 - Performance optimization
 
-### Phase 5: AI Integration & Polish (Steps 21-25)
+### Phase 5: AI Integration & Polish (Steps 22-26)
 - Enhanced API endpoints
 - WebSocket support
 - Documentation and testing
@@ -471,9 +472,49 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 12: Shader Rendering System
-**Duration**: 4-5 hours
+### Step 12: MadMapper Parser and Validation Integration
+**Duration**: 3-4 hours
 **Dependencies**: Step 11
+**Deliverables**: Complete MadMapper shader parsing and validation
+
+**Tasks**:
+1. Create MadMapper parser with comment-based metadata extraction
+2. Implement shader section parsing (vertex, fragment, compute)
+3. Add parameter parsing and validation
+4. Create MadMapper analyzer with validation rules
+5. Implement shader code analysis and error detection
+6. Add input/output validation for MadMapper format
+7. Create comprehensive test suite for MadMapper support
+
+**Success Criteria**:
+- MadMapper shaders are parsed correctly
+- Metadata is extracted from comments
+- Shader sections are identified properly
+- Parameters are validated
+- Validation rules are applied
+- Error reporting is comprehensive
+- Tests pass for MadMapper format
+
+**Files to Create/Modify**:
+- src/core/parsers/madmapper_parser.py
+- src/core/analyzers/madmapper_analyzer.py
+- src/services/validation_service.py
+- tests/unit/test_madmapper_integration.py
+
+**Implementation Log Directive:**
+After completing this step, update `IMPLEMENTATION_LOG.md` with:
+- A summary of all user prompts and requirements relevant to this step
+- Any deviations from the plan (e.g., technical issues, package changes)
+- A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
+---
+
+### Step 13: Shader Rendering System
+**Duration**: 4-5 hours
+**Dependencies**: Step 12
 **Deliverables**: Complete shader rendering and image generation system
 
 **Tasks**:
@@ -510,9 +551,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 13: Visualization API Endpoints
+### Step 14: Visualization API Endpoints
 **Duration**: 2-3 hours
-**Dependencies**: Step 12
+**Dependencies**: Step 13
 **Deliverables**: Complete visualization API with image generation
 
 **Tasks**:
@@ -548,9 +589,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 14: Error Visualization & Analysis
+### Step 15: Error Visualization & Analysis
 **Duration**: 3-4 hours
-**Dependencies**: Step 13
+**Dependencies**: Step 14
 **Deliverables**: Visual error reporting and analysis tools
 
 **Tasks**:
@@ -588,9 +629,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 15: WebSocket Support
+### Step 16: WebSocket Support
 **Duration**: 3-4 hours
-**Dependencies**: Step 14
+**Dependencies**: Step 15
 **Deliverables**: Real-time validation feedback via WebSocket
 
 **Tasks**:
@@ -627,9 +668,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 16: Advanced Analysis Features
+### Step 17: Advanced Analysis Features
 **Duration**: 4-5 hours
-**Dependencies**: Step 15
+**Dependencies**: Step 16
 **Deliverables**: Advanced analysis capabilities for shader optimization
 
 **Tasks**:
@@ -667,9 +708,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 17: Batch Processing & Queue Management
+### Step 18: Batch Processing & Queue Management
 **Duration**: 3-4 hours
-**Dependencies**: Step 16
+**Dependencies**: Step 17
 **Deliverables**: Efficient batch processing system for multiple shaders
 
 **Tasks**:
@@ -706,9 +747,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 18: Performance Optimization
+### Step 19: Performance Optimization
 **Duration**: 3-4 hours
-**Dependencies**: Step 17
+**Dependencies**: Step 18
 **Deliverables**: Optimized performance for production use
 
 **Tasks**:
@@ -745,9 +786,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 19: Security & Input Validation
+### Step 20: Security & Input Validation
 **Duration**: 2-3 hours
-**Dependencies**: Step 18
+**Dependencies**: Step 19
 **Deliverables**: Comprehensive security measures and input validation
 
 **Tasks**:
@@ -784,9 +825,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 20: Testing Framework
+### Step 21: Testing Framework
 **Duration**: 4-5 hours
-**Dependencies**: Step 19
+**Dependencies**: Step 20
 **Deliverables**: Comprehensive test suite for all components
 
 **Tasks**:
@@ -826,9 +867,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 21: Documentation & API Specification
+### Step 22: Documentation & API Specification
 **Duration**: 3-4 hours
-**Dependencies**: Step 20
+**Dependencies**: Step 21
 **Deliverables**: Complete documentation and API specification
 
 **Tasks**:
@@ -866,9 +907,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 22: Deployment & Production Setup
+### Step 23: Deployment & Production Setup
 **Duration**: 2-3 hours
-**Dependencies**: Step 21
+**Dependencies**: Step 22
 **Deliverables**: Production-ready deployment configuration
 
 **Tasks**:
@@ -906,9 +947,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 23: CI/CD Pipeline
+### Step 24: CI/CD Pipeline
 **Duration**: 2-3 hours
-**Dependencies**: Step 22
+**Dependencies**: Step 23
 **Deliverables**: Automated CI/CD pipeline for testing and deployment
 
 **Tasks**:
@@ -946,9 +987,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 24: Final Integration & Testing
+### Step 25: Final Integration & Testing
 **Duration**: 3-4 hours
-**Dependencies**: Step 23
+**Dependencies**: Step 24
 **Deliverables**: Complete system integration and end-to-end testing
 
 **Tasks**:
@@ -985,9 +1026,9 @@ After completing this step, write a commit message for the implementation done i
 
 ---
 
-### Step 25: Project Completion & Handover
+### Step 26: Project Completion & Handover
 **Duration**: 1-2 hours
-**Dependencies**: Step 24
+**Dependencies**: Step 25
 **Deliverables**: Complete project ready for production use
 
 **Tasks**:
