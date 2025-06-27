@@ -41,6 +41,7 @@ from src.api.models.responses import HealthResponse, ErrorResponse
 # Import routes
 from src.api.routes import health as health_routes
 from src.api.routes import validation as validation_routes
+from src.api.routes import visualization as visualization_routes
 
 # Setup logging
 logger = setup_logging(
@@ -188,6 +189,9 @@ app.include_router(health_routes.router, prefix="/api/v1")
 
 # Include validation routes
 app.include_router(validation_routes.router, prefix="/api/v1")
+
+# Include visualization routes
+app.include_router(visualization_routes.router, prefix="/api/v1")
 
 if __name__ == "__main__":
     uvicorn.run(

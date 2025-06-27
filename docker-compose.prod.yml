@@ -1,65 +1,264 @@
 version: '3.8'
 
 services:
-  shader-validator:
-    build: .
+  # Main application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: ai-shadervalidator:latest
+    container_name: ai-shadervalidator-app
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - HOST=0.0.0.0
+      - PORT=8000
+      - WORKERS=4
+      - MAX_CONNECTIONS=1000
+      - RATE_LIMIT_PER_MINUTE=100
+      - MAX_SHADER_SIZE=1048576
+      - VALIDATION_TIMEOUT=30
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://shader_user:shader_pass@postgres:5432/shadervalidator
     ports:
       - "8000:8000"
     volumes:
-      - ./storage:/app/storage
-      - ./logs:/app/logs
-      - ./cache:/app/cache
-    environment:
-      - DATABASE_URL=sqlite:///./storage/shader_validator.db
-      - STORAGE_PATH=/app/storage
-      - LOG_LEVEL=WARNING
-      - DEBUG=false
-      - ALLOW_REMOTE_ACCESS=true
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4
-    restart: unless-stopped
+      - app_data:/app/storage
+      - app_logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - shader-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '2.0'
-        reservations:
-          memory: 512M
-          cpus: '0.5'
 
-  # Optional: PostgreSQL for production use
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=shader_validator
-      - POSTGRES_USER=shader_user
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-shader_pass}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+  # Load balancer
+  nginx:
+    image: nginx:alpine
+    container_name: ai-shadervalidator-nginx
     restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - shader-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U shader_user -d shader_validator"]
+      test: ["CMD", "nginx", "-t"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai-shadervalidator-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=shadervalidator
+      - POSTGRES_USER=shader_user
+      - POSTGRES_PASSWORD=shader_pass
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - shader-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shader_user -d shadervalidator"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     deploy:
       resources:
         limits:
-          memory: 1G
           cpus: '1.0'
+          memory: 1G
         reservations:
-          memory: 256M
+          cpus: '0.5'
+          memory: 512M
+
+  # Redis cache
+  redis:
+    image: redis:7-alpine
+    container_name: ai-shadervalidator-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - shader-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
           cpus: '0.25'
-    profiles:
+          memory: 256M
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ai-shadervalidator-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - shader-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ai-shadervalidator-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - shader-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Log aggregation - ELK Stack
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: ai-shadervalidator-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - shader-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: ai-shadervalidator-kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - shader-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: ai-shadervalidator-backup
+    restart: "no"
+    environment:
+      - POSTGRES_DB=shadervalidator
+      - POSTGRES_USER=shader_user
+      - POSTGRES_PASSWORD=shader_pass
+      - POSTGRES_HOST=postgres
+    volumes:
+      - ./docker/backup/backup.sh:/backup.sh:ro
+      - backup_data:/backups
+    depends_on:
       - postgres
+    networks:
+      - shader-network
+    command: ["/bin/sh", "/backup.sh"]
 
 volumes:
-  postgres_data: 
+  app_data:
+    driver: local
+  app_logs:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  backup_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  shader-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
