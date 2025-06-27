@@ -1,0 +1,30 @@
+# AI Shader Validation Tool - Development Dependencies
+
+# Include production dependencies
+-r requirements.txt
+
+# Development Tools
+pre-commit==3.6.0
+mypy==1.7.1
+bandit==1.7.5
+
+# Testing
+pytest-mock==3.12.0
+pytest-benchmark==4.0.0
+factory-boy==3.3.0
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.4.8
+mkdocstrings[python]==0.24.0
+
+# Debugging
+ipython==8.18.1
+ipdb==0.13.13
+
+# Performance Profiling
+memory-profiler==0.61.0
+line-profiler==4.1.2
+
+# API Documentation
+fastapi-pydantic==1.0.0 

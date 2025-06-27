@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  shader-validator:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+    environment:
+      - DATABASE_URL=sqlite:///./storage/shader_validator.db
+      - STORAGE_PATH=/app/storage
+      - LOG_LEVEL=INFO
+      - DEBUG=true
+      - ALLOW_REMOTE_ACCESS=false
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: PostgreSQL for advanced users who prefer it over SQLite
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=shader_validator
+      - POSTGRES_USER=shader_user
+      - POSTGRES_PASSWORD=shader_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shader_user -d shader_validator"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    profiles:
+      - postgres
+
+volumes:
+  postgres_data: 
