@@ -128,18 +128,59 @@ class GLSLParser(BaseShaderParser):
                 'return' in stripped_line):
                 continue
             
+            # Remove comments from the line for analysis
+            # Handle both // and /* */ comments
+            analysis_line = stripped_line
+            
+            # Remove // comments
+            if '//' in analysis_line:
+                analysis_line = analysis_line.split('//')[0].strip()
+            
+            # Remove /* */ comments (simplified - assumes they don't span multiple lines)
+            if '/*' in analysis_line and '*/' in analysis_line:
+                start = analysis_line.find('/*')
+                end = analysis_line.find('*/') + 2
+                analysis_line = analysis_line[:start] + analysis_line[end:].strip()
+            
+            # Skip if the line is now empty after removing comments
+            if not analysis_line:
+                continue
+            
             # Check for variable declarations and assignments that should end with semicolon
-            if (re.search(r'\b(?:uniform|attribute|varying|in|out|const)\s+\w+\s+\w+', stripped_line) or
-                re.search(r'\w+\s*=\s*[^;]+$', stripped_line) or
-                re.search(r'\w+\s*\([^)]*\)\s*$', stripped_line)):  # Function calls
+            if (re.search(r'\b(?:uniform|attribute|varying|in|out|const)\s+\w+\s+\w+', analysis_line) or
+                re.search(r'\w+\s*=\s*[^;]+$', analysis_line) or
+                re.search(r'\w+\s*\([^)]*\)\s*$', analysis_line)):  # Function calls
                 
-                if not stripped_line.endswith(';'):
+                if not analysis_line.endswith(';'):
                     self.errors.append({
                         "message": "Missing semicolon",
                         "severity": "error",
                         "line": line_num,
-                        "column": len(stripped_line) + 1
+                        "column": len(analysis_line) + 1
                     })
+            
+            # Additional check for specific GLSL patterns that should end with semicolon
+            # Check for vec4, vec3, vec2 assignments
+            if re.search(r'\b(?:vec[234]|float|int|bool)\s*\([^)]*\)\s*$', analysis_line):
+                if not analysis_line.endswith(';'):
+                    self.errors.append({
+                        "message": "Missing semicolon after vector/type constructor",
+                        "severity": "error",
+                        "line": line_num,
+                        "column": len(analysis_line) + 1
+                    })
+            
+            # Check for function calls that should end with semicolon
+            if re.search(r'\w+\s*\([^)]*\)\s*$', analysis_line):
+                # Skip function definitions (those ending with {)
+                if not analysis_line.endswith('{'):
+                    if not analysis_line.endswith(';'):
+                        self.errors.append({
+                            "message": "Missing semicolon after function call",
+                            "severity": "error",
+                            "line": line_num,
+                            "column": len(analysis_line) + 1
+                        })
     
     def _check_unmatched_braces(self):
         """Check for unmatched braces"""

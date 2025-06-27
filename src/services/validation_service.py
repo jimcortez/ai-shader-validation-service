@@ -346,16 +346,30 @@ class ValidationService:
     def _perform_syntax_analysis(self, code: str, result: Dict[str, Any]):
         """Perform syntax analysis."""
         try:
-            syntax_issues = self.syntax_analyzer.analyze(code)
-            for issue in syntax_issues:
+            syntax_result = self.syntax_analyzer.analyze(code)
+            
+            # Process errors from syntax analysis
+            for error in syntax_result.get("errors", []):
                 error_info = {
-                    "message": str(issue),
-                    "line": 0,
-                    "column": 0,
-                    "severity": "warning",
+                    "message": error.get("message", "Syntax error"),
+                    "line": error.get("line", 0),
+                    "column": error.get("column", 0),
+                    "severity": "error",
                     "error_code": "SYNTAX_ERROR"
                 }
-                result["warnings"].append(error_info)
+                result["errors"].append(error_info)
+            
+            # Process warnings from syntax analysis
+            for warning in syntax_result.get("warnings", []):
+                warning_info = {
+                    "message": warning.get("message", "Syntax warning"),
+                    "line": warning.get("line", 0),
+                    "column": warning.get("column", 0),
+                    "severity": "warning",
+                    "error_code": "SYNTAX_WARNING"
+                }
+                result["warnings"].append(warning_info)
+                
         except Exception as e:
             result["warnings"].append({
                 "message": f"Syntax analysis failed: {str(e)}",
