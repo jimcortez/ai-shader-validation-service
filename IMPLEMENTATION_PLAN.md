@@ -10,6 +10,9 @@ After completing each step, update the `IMPLEMENTATION_LOG.md` file. The log ent
 - Note any deviations from the original plan (including technical or process changes)
 - Briefly describe what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing each step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ## Implementation Strategy
 
 ### Phase 1: Foundation & Core Infrastructure (Steps 1-5)
@@ -74,6 +77,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 2: Core API Framework
@@ -109,6 +115,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -146,6 +155,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 4: Core Validation Engine Framework
@@ -181,6 +193,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -218,6 +233,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 6: Basic Validation Logic
@@ -253,6 +271,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -290,6 +311,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 8: C++ Build System Setup
@@ -325,6 +349,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -362,6 +389,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 10: ISF Parser Implementation
@@ -396,6 +426,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -433,6 +466,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 12: Shader Rendering System
@@ -469,6 +505,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 13: Visualization API Endpoints
@@ -503,6 +542,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -541,6 +583,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 15: WebSocket Support
@@ -576,6 +621,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -614,6 +662,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 17: Batch Processing & Queue Management
@@ -649,6 +700,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -686,6 +740,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 19: Security & Input Validation
@@ -721,6 +778,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -761,6 +821,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 21: Documentation & API Specification
@@ -797,6 +860,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - A summary of all user prompts and requirements relevant to this step
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -835,6 +901,9 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - Any deviations from the plan (e.g., technical issues, package changes)
 - A brief description of what was implemented and any issues encountered
 
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 23: CI/CD Pipeline
@@ -866,6 +935,15 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - .github/ISSUE_TEMPLATE/
 - .github/PULL_REQUEST_TEMPLATE.md
 
+**Implementation Log Directive:**
+After completing this step, update `IMPLEMENTATION_LOG.md` with:
+- A summary of all user prompts and requirements relevant to this step
+- Any deviations from the plan (e.g., technical issues, package changes)
+- A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
+
 ---
 
 ### Step 24: Final Integration & Testing
@@ -895,6 +973,15 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - tests/e2e/
 - scripts/final_test.sh
 - README.md (final version)
+
+**Implementation Log Directive:**
+After completing this step, update `IMPLEMENTATION_LOG.md` with:
+- A summary of all user prompts and requirements relevant to this step
+- Any deviations from the plan (e.g., technical issues, package changes)
+- A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ---
 
@@ -927,6 +1014,15 @@ After completing this step, update `IMPLEMENTATION_LOG.md` with:
 - ROADMAP.md
 - LICENSE
 - HANDOVER.md
+
+**Implementation Log Directive:**
+After completing this step, update `IMPLEMENTATION_LOG.md` with:
+- A summary of all user prompts and requirements relevant to this step
+- Any deviations from the plan (e.g., technical issues, package changes)
+- A brief description of what was implemented and any issues encountered
+
+**Commit Directive:**
+After completing this step, write a commit message for the implementation done in the last step and automatically commit all changes made, but do not push the commits. Reference the number and name of the step you worked on.
 
 ## Implementation Timeline
 

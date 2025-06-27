@@ -2,9 +2,13 @@
 Validation service orchestration
 """
 from src.core.validator import ValidationEngine
+from src.core.parser.glsl_parser import GLSLParser
 from typing import Dict, Any, Optional
 
 validation_engine = ValidationEngine()
+
+# Register parsers
+validation_engine.register_parser("glsl", GLSLParser)
 
 class ValidationService:
     """Service for orchestrating shader validation."""
