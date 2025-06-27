@@ -61,6 +61,7 @@ class GLFeature(Enum):
     COMPUTE_SHADER = "compute_shader"
     MULTIPLE_RENDER_TARGETS = "multiple_render_targets"
     TEXTURE_ARRAYS = "texture_arrays"
+    TEXTURE_BUFFERS = "texture_buffers"
     CUBE_MAP_ARRAYS = "cube_map_arrays"
     INSTANCED_RENDERING = "instanced_rendering"
     TRANSFORM_FEEDBACK = "transform_feedback"

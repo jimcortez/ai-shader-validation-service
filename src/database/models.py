@@ -25,6 +25,32 @@ class Shader(Base):
     analysis_results = relationship("AnalysisResult", back_populates="shader")
     generated_images = relationship("GeneratedImage", back_populates="shader")
 
+class ValidationRecord(Base):
+    """Model for storing validation records."""
+    __tablename__ = "validation_records"
+    id = Column(String, primary_key=True, default=generate_uuid)
+    format = Column(String, nullable=False)
+    target_version = Column(String, nullable=True)
+    target_platforms = Column(String, nullable=True)
+    is_valid = Column(Boolean, nullable=True)
+    error_count = Column(Integer, default=0)
+    warning_count = Column(Integer, default=0)
+    quality_score = Column(Float, nullable=True)
+    processing_time_ms = Column(Float, nullable=True)
+    user_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ValidationHistory(Base):
+    """Model for storing validation history."""
+    __tablename__ = "validation_history"
+    id = Column(String, primary_key=True, default=generate_uuid)
+    validation_id = Column(String, nullable=False)
+    user_id = Column(String, nullable=True)
+    format = Column(String, nullable=False)
+    status = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class ValidationResult(Base):
     __tablename__ = "validation_results"
     id = Column(String, primary_key=True, default=generate_uuid)

@@ -11,117 +11,152 @@ class GLSLNode:
     column: Optional[int] = None
 
 @dataclass
-class GLSLProgram(GLSLNode):
+class GLSLProgram:
     """Root node representing a GLSL program"""
     statements: List['GLSLStatement']
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLStatement(GLSLNode):
+class GLSLStatement:
     """Base class for GLSL statements"""
-    pass
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLDeclaration(GLSLStatement):
+class GLSLDeclaration:
     """Variable declaration"""
     type_specifier: str
     declarators: List['GLSLDeclarator']
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLDeclarator(GLSLNode):
+class GLSLDeclarator:
     """Variable declarator"""
     name: str
     array_sizes: List['GLSLExpression']
     initializer: Optional['GLSLExpression']
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLExpression(GLSLNode):
+class GLSLExpression:
     """Base class for GLSL expressions"""
-    pass
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLBinaryExpression(GLSLExpression):
+class GLSLBinaryExpression:
     """Binary expression"""
     operator: str
     left: GLSLExpression
     right: GLSLExpression
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLUnaryExpression(GLSLExpression):
+class GLSLUnaryExpression:
     """Unary expression"""
     operator: str
     operand: GLSLExpression
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLIdentifier(GLSLExpression):
+class GLSLIdentifier:
     """Identifier expression"""
     name: str
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLLiteral(GLSLExpression):
+class GLSLLiteral:
     """Literal expression"""
     value: Any
     type: str
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLFunctionCall(GLSLExpression):
+class GLSLFunctionCall:
     """Function call expression"""
     function: GLSLExpression
     arguments: List[GLSLExpression]
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLArrayAccess(GLSLExpression):
+class GLSLArrayAccess:
     """Array access expression"""
     array: GLSLExpression
     index: GLSLExpression
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLMemberAccess(GLSLExpression):
+class GLSLMemberAccess:
     """Member access expression"""
     object: GLSLExpression
     member: str
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLCompoundStatement(GLSLStatement):
+class GLSLCompoundStatement:
     """Compound statement (block)"""
     statements: List[GLSLStatement]
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLIfStatement(GLSLStatement):
+class GLSLIfStatement:
     """If statement"""
     condition: GLSLExpression
     then_statement: GLSLStatement
     else_statement: Optional[GLSLStatement]
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLForStatement(GLSLStatement):
+class GLSLForStatement:
     """For statement"""
     init: Optional[GLSLStatement]
     condition: Optional[GLSLExpression]
     increment: Optional[GLSLExpression]
     body: GLSLStatement
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLWhileStatement(GLSLStatement):
+class GLSLWhileStatement:
     """While statement"""
     condition: GLSLExpression
     body: GLSLStatement
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLReturnStatement(GLSLStatement):
+class GLSLReturnStatement:
     """Return statement"""
     value: Optional[GLSLExpression]
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLBreakStatement(GLSLStatement):
+class GLSLBreakStatement:
     """Break statement"""
-    pass
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLContinueStatement(GLSLStatement):
+class GLSLContinueStatement:
     """Continue statement"""
-    pass
+    line: Optional[int] = None
+    column: Optional[int] = None
 
 @dataclass
-class GLSLDiscardStatement(GLSLStatement):
+class GLSLDiscardStatement:
     """Discard statement"""
-    pass 
+    line: Optional[int] = None
+    column: Optional[int] = None 
