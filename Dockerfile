@@ -25,8 +25,10 @@ WORKDIR /app
 COPY external ./external
 
 # Copy requirements and install Python dependencies
+COPY requirements/requirements-dev.txt .
 COPY requirements/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-dev.txt
 
 # Install pybind11 (header-only)
 RUN pip install pybind11
@@ -45,6 +47,7 @@ RUN chmod +x ./scripts/build_cpp.sh && ./scripts/build_cpp.sh
 
 # Copy application source
 COPY src/ ./src/
+COPY tests/ ./tests/
 
 # Create necessary directories
 RUN mkdir -p /app/storage /app/logs /app/cache

@@ -47,7 +47,7 @@ async def validation_exception_handler(request: Request, exc: ValidationExceptio
             detail=exc.detail,
             code="VALIDATION_ERROR",
             timestamp=datetime.utcnow()
-        ).dict()
+        ).model_dump()
     )
 
 async def shader_parse_exception_handler(request: Request, exc: ShaderParseException):
@@ -59,7 +59,7 @@ async def shader_parse_exception_handler(request: Request, exc: ShaderParseExcep
             detail=exc.detail,
             code="SHADER_PARSE_ERROR",
             timestamp=datetime.utcnow()
-        ).dict()
+        ).model_dump()
     )
 
 async def processing_exception_handler(request: Request, exc: ProcessingException):
@@ -71,7 +71,7 @@ async def processing_exception_handler(request: Request, exc: ProcessingExceptio
             detail=exc.detail,
             code="PROCESSING_ERROR",
             timestamp=datetime.utcnow()
-        ).dict()
+        ).model_dump()
     )
 
 async def resource_not_found_exception_handler(request: Request, exc: ResourceNotFoundException):
@@ -83,7 +83,7 @@ async def resource_not_found_exception_handler(request: Request, exc: ResourceNo
             detail=exc.detail,
             code="RESOURCE_NOT_FOUND",
             timestamp=datetime.utcnow()
-        ).dict()
+        ).model_dump()
     )
 
 async def rate_limit_exception_handler(request: Request, exc: RateLimitException):
@@ -95,7 +95,7 @@ async def rate_limit_exception_handler(request: Request, exc: RateLimitException
             detail=exc.detail,
             code="RATE_LIMIT_EXCEEDED",
             timestamp=datetime.utcnow()
-        ).dict(),
+        ).model_dump(),
         headers={"Retry-After": "60"}
     )
 
@@ -108,5 +108,5 @@ async def general_exception_handler(request: Request, exc: Exception):
             detail="An unexpected error occurred",
             code="INTERNAL_ERROR",
             timestamp=datetime.utcnow()
-        ).dict()
+        ).model_dump()
     ) 

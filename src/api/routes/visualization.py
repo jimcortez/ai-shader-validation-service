@@ -23,7 +23,7 @@ from src.core.utils.image_utils import bytes_to_pil_image
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/visualize", tags=["visualization"])
+router = APIRouter(tags=["visualization"])
 
 
 @router.post("/", response_model=VisualizationResponse)

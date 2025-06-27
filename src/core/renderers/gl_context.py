@@ -317,4 +317,6 @@ def cleanup_global_context():
     global _global_context
     if _global_context is not None:
         _global_context.cleanup()
-        _global_context = None 
+        _global_context = None
+
+OpenGLContext = GLContextManager 

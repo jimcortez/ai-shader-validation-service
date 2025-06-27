@@ -3,20 +3,65 @@
 # Include production dependencies
 -r requirements.txt
 
-# Development Tools
-pre-commit==3.6.0
-mypy==1.7.1
-bandit==1.7.5
+# Core dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.13.1
+psycopg2-binary==2.9.9
+redis==5.0.1
+
+# Image processing
+opencv-python==4.8.1.78
+pillow>=10.0.0
+numpy==1.25.2
+
+# Parsing and analysis
+lark==1.1.8
+networkx==3.2.1
+matplotlib==3.8.2
+
+# OpenGL and rendering
+PyOpenGL==3.1.7
 
 # Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
 pytest-mock==3.12.0
-pytest-benchmark==4.0.0
-factory-boy==3.3.0
+httpx==0.25.2
+
+# Development tools
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+mypy==1.7.1
+bandit==1.7.5
 
 # Documentation
 mkdocs==1.5.3
 mkdocs-material==9.4.8
 mkdocstrings[python]==0.24.0
+
+# Monitoring and metrics
+prometheus-client==0.19.0
+structlog==23.2.0
+
+# WebSocket support
+websockets==12.0
+
+# Machine learning (optional)
+scikit-learn==1.3.2
+tensorflow==2.15.0
+
+# Additional utilities
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
 
 # Debugging
 ipython==8.18.1
@@ -24,7 +69,4 @@ ipdb==0.13.13
 
 # Performance Profiling
 memory-profiler==0.61.0
-line-profiler==4.1.2
-
-# API Documentation
-fastapi-pydantic==1.0.0 
+line-profiler==4.1.2 

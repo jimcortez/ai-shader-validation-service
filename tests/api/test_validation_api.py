@@ -16,73 +16,81 @@ class TestValidationAPI:
     def test_validate_glsl_shader_success(self, client: TestClient, sample_glsl_shader: str):
         """Test successful GLSL shader validation."""
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": sample_glsl_shader,
-            "parameters": {"time": 0.0}
+            "code": sample_glsl_shader,
+            "format": "glsl",
+            "target_version": "330",
+            "custom_parameters": {"time": 0.0}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
         assert response.status_code == 200
         data = response.json()
-        assert "validation_result" in data
-        assert "errors" in data["validation_result"]
-        assert "warnings" in data["validation_result"]
-        assert "is_valid" in data["validation_result"]
+        assert "validation_id" in data
+        assert "is_valid" in data
+        assert "status" in data
+        assert "format" in data
+        assert "target_version" in data
+        assert "errors" in data
+        assert "warnings" in data
+        assert "created_at" in data
+        assert "processing_time_ms" in data
     
     def test_validate_isf_shader_success(self, client: TestClient, sample_isf_shader: dict):
         """Test successful ISF shader validation."""
         request_data = {
-            "shader_type": "ISF",
-            "shader_source": json.dumps(sample_isf_shader),
-            "parameters": {"time": 0.0}
+            "code": json.dumps(sample_isf_shader),
+            "format": "isf",
+            "custom_parameters": {"time": 0.0}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
         assert response.status_code == 200
         data = response.json()
-        assert "validation_result" in data
-        assert "errors" in data["validation_result"]
-        assert "warnings" in data["validation_result"]
-        assert "is_valid" in data["validation_result"]
+        assert "validation_id" in data
+        assert "is_valid" in data
+        assert "status" in data
+        assert "format" in data
+        assert "errors" in data
+        assert "warnings" in data
     
     def test_validate_madmapper_shader_success(self, client: TestClient, sample_madmapper_shader: str):
         """Test successful MadMapper shader validation."""
         request_data = {
-            "shader_type": "MADMAPPER",
-            "shader_source": sample_madmapper_shader,
-            "parameters": {"time": 0.0}
+            "code": sample_madmapper_shader,
+            "format": "madmapper",
+            "custom_parameters": {"time": 0.0}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
         assert response.status_code == 200
         data = response.json()
-        assert "validation_result" in data
-        assert "errors" in data["validation_result"]
-        assert "warnings" in data["validation_result"]
-        assert "is_valid" in data["validation_result"]
+        assert "validation_id" in data
+        assert "is_valid" in data
+        assert "status" in data
+        assert "format" in data
+        assert "errors" in data
+        assert "warnings" in data
     
     def test_validate_invalid_shader_type(self, client: TestClient):
         """Test validation with invalid shader type."""
         request_data = {
-            "shader_type": "INVALID_TYPE",
-            "shader_source": "void main() {}",
-            "parameters": {}
+            "code": "void main() {}",
+            "format": "invalid_format",
+            "custom_parameters": {}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
-        assert response.status_code == 400
-        data = response.json()
-        assert "error" in data
+        assert response.status_code == 422  # Validation error
     
     def test_validate_missing_shader_source(self, client: TestClient):
         """Test validation with missing shader source."""
         request_data = {
-            "shader_type": "GLSL",
-            "parameters": {}
+            "format": "glsl",
+            "custom_parameters": {}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
@@ -92,16 +100,14 @@ class TestValidationAPI:
     def test_validate_empty_shader_source(self, client: TestClient):
         """Test validation with empty shader source."""
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": "",
-            "parameters": {}
+            "code": "",
+            "format": "glsl",
+            "custom_parameters": {}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
-        assert response.status_code == 400
-        data = response.json()
-        assert "error" in data
+        assert response.status_code == 422  # Validation error
     
     def test_validate_glsl_with_syntax_error(self, client: TestClient):
         """Test GLSL validation with syntax error."""
@@ -115,47 +121,47 @@ class TestValidationAPI:
         """
         
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": invalid_shader,
-            "parameters": {"time": 0.0}
+            "code": invalid_shader,
+            "format": "glsl",
+            "target_version": "330",
+            "custom_parameters": {"time": 0.0}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
         assert response.status_code == 200
         data = response.json()
-        assert "validation_result" in data
-        assert len(data["validation_result"]["errors"]) > 0
-        assert not data["validation_result"]["is_valid"]
+        assert len(data["errors"]) > 0
+        assert not data["is_valid"]
     
     def test_validate_isf_with_invalid_json(self, client: TestClient):
         """Test ISF validation with invalid JSON."""
         request_data = {
-            "shader_type": "ISF",
-            "shader_source": "{ invalid json }",
-            "parameters": {}
+            "code": "{ invalid json }",
+            "format": "isf",
+            "custom_parameters": {}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
-        assert response.status_code == 400
+        assert response.status_code == 200  # Should validate but find errors
         data = response.json()
-        assert "error" in data
+        assert len(data["errors"]) > 0
     
     def test_validate_with_large_shader(self, client: TestClient):
         """Test validation with very large shader."""
         large_shader = "void main() { " + "fragColor = vec4(1.0); " * 10000 + "}"
         
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": large_shader,
-            "parameters": {}
+            "code": large_shader,
+            "format": "glsl",
+            "custom_parameters": {}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
         # Should either succeed or return a specific error for large shaders
-        assert response.status_code in [200, 413]
+        assert response.status_code in [200, 413, 422]  # Added 422 as valid response
     
     def test_validate_with_special_characters(self, client: TestClient):
         """Test validation with special characters in shader."""
@@ -170,16 +176,18 @@ class TestValidationAPI:
         """
         
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": shader_with_special_chars,
-            "parameters": {"time": 0.0}
+            "code": shader_with_special_chars,
+            "format": "glsl",
+            "target_version": "330",
+            "custom_parameters": {"time": 0.0}
         }
         
         response = client.post("/api/v1/validate", json=request_data)
         
         assert response.status_code == 200
         data = response.json()
-        assert "validation_result" in data
+        assert "validation_id" in data
+        assert "is_valid" in data
     
     def test_validate_health_check(self, client: TestClient):
         """Test health check endpoint."""
@@ -279,9 +287,10 @@ class TestValidationAPIPerformance:
         import time
         
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": sample_glsl_shader,
-            "parameters": {"time": 0.0}
+            "code": sample_glsl_shader,
+            "format": "glsl",
+            "target_version": "330",
+            "custom_parameters": {"time": 0.0}
         }
         
         start_time = time.time()
@@ -298,9 +307,10 @@ class TestValidationAPIPerformance:
         import time
         
         request_data = {
-            "shader_type": "GLSL",
-            "shader_source": sample_glsl_shader,
-            "parameters": {"time": 0.0}
+            "code": sample_glsl_shader,
+            "format": "glsl",
+            "target_version": "330",
+            "custom_parameters": {"time": 0.0}
         }
         
         results = []

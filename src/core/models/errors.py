@@ -13,6 +13,7 @@ class ErrorSeverity(Enum):
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"
+    SUCCESS = "success"
 
 
 @dataclass

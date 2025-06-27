@@ -108,20 +108,20 @@ class ValidationService:
         
         ast_root = ast_result["ast"]
         
-        # Perform comprehensive analysis
-        self._perform_syntax_analysis(ast_root, result)
-        self._perform_semantic_analysis(ast_root, result)
-        self._perform_logic_analysis(ast_root, result)
-        self._perform_data_flow_analysis(ast_root, result)
-        self._perform_mathematical_validation(ast_root, result)
+        # Perform comprehensive analysis using the appropriate type for each analyzer
+        self._perform_syntax_analysis(code, result)  # Expects string
+        self._perform_semantic_analysis(code, result)  # Expects string
+        self._perform_logic_analysis(ast_root, result)  # Expects GLSLNode
+        self._perform_data_flow_analysis(ast_root, result)  # Expects GLSLNode
+        self._perform_mathematical_validation(ast_root, result)  # Expects GLSLNode
         
         if parameters.get("enable_portability_analysis", True):
-            self._perform_portability_analysis(ast_root, result, 
+            self._perform_portability_analysis(code, result, 
                                              parameters.get("target_version", "330"), 
                                              parameters.get("target_platforms", ["desktop", "mobile", "web"]))
         
         if parameters.get("enable_quality_analysis", True):
-            self._perform_quality_analysis(ast_root, result)
+            self._perform_quality_analysis(code, result)
         
         # Check for any critical errors
         if result["errors"]:
@@ -343,10 +343,10 @@ class ValidationService:
                 }]
             }
     
-    def _perform_syntax_analysis(self, ast_root, result: Dict[str, Any]):
+    def _perform_syntax_analysis(self, code: str, result: Dict[str, Any]):
         """Perform syntax analysis."""
         try:
-            syntax_issues = self.syntax_analyzer.analyze(ast_root)
+            syntax_issues = self.syntax_analyzer.analyze(code)
             for issue in syntax_issues:
                 error_info = {
                     "message": str(issue),
@@ -365,10 +365,10 @@ class ValidationService:
                 "error_code": "ANALYSIS_ERROR"
             })
     
-    def _perform_semantic_analysis(self, ast_root, result: Dict[str, Any]):
+    def _perform_semantic_analysis(self, code: str, result: Dict[str, Any]):
         """Perform semantic analysis."""
         try:
-            semantic_issues = self.semantic_analyzer.analyze(ast_root)
+            semantic_issues = self.semantic_analyzer.analyze(code)
             for issue in semantic_issues:
                 error_info = {
                     "message": str(issue),
@@ -453,16 +453,16 @@ class ValidationService:
                 "error_code": "ANALYSIS_ERROR"
             })
     
-    def _perform_portability_analysis(self, ast_root, result: Dict[str, Any], 
+    def _perform_portability_analysis(self, code: str, result: Dict[str, Any], 
                                     target_version: str, target_platforms: List[str]):
         """Perform portability analysis."""
         try:
             # Get version info from shader
-            version_info = self.version_detector.detect_version_from_shader(result.get("shader_source", ""))
+            version_info = self.version_detector.detect_version_from_shader(code)
             
             # Analyze portability issues
             portability_issues = self.portability_analyzer.analyze(
-                ast_root, target_version, target_platforms
+                code, target_version, target_platforms
             )
             
             for issue in portability_issues:
@@ -493,10 +493,10 @@ class ValidationService:
                 "error_code": "ANALYSIS_ERROR"
             })
     
-    def _perform_quality_analysis(self, ast_root, result: Dict[str, Any]):
+    def _perform_quality_analysis(self, code: str, result: Dict[str, Any]):
         """Perform quality analysis."""
         try:
-            quality_report = self.quality_analyzer.analyze(ast_root)
+            quality_report = self.quality_analyzer.analyze(code)
             
             # Add quality metrics
             result["quality_metrics"] = {
@@ -633,4 +633,8 @@ class ValidationService:
 
 
 # Global validation service instance
-validation_service = ValidationService() 
+validation_service = ValidationService()
+
+def get_validation_service():
+    """Return the global validation service instance."""
+    return validation_service 

@@ -99,6 +99,98 @@ class GLSLParser(BaseShaderParser):
                     "line": 1,
                     "column": 1
                 })
+        
+        # Check for missing semicolons
+        self._check_missing_semicolons()
+        
+        # Check for unmatched braces
+        self._check_unmatched_braces()
+        
+        # Check for incomplete statements
+        self._check_incomplete_statements()
+    
+    def _check_missing_semicolons(self):
+        """Check for missing semicolons after statements"""
+        lines = self.code.split('\n')
+        for line_num, line in enumerate(lines, 1):
+            stripped_line = line.strip()
+            
+            # Skip empty lines, comments, and control structures
+            if (not stripped_line or 
+                stripped_line.startswith('//') or 
+                stripped_line.startswith('/*') or
+                stripped_line.startswith('#') or
+                stripped_line.endswith('{') or
+                stripped_line.endswith('}') or
+                'if' in stripped_line or
+                'for' in stripped_line or
+                'while' in stripped_line or
+                'return' in stripped_line):
+                continue
+            
+            # Check for variable declarations and assignments that should end with semicolon
+            if (re.search(r'\b(?:uniform|attribute|varying|in|out|const)\s+\w+\s+\w+', stripped_line) or
+                re.search(r'\w+\s*=\s*[^;]+$', stripped_line) or
+                re.search(r'\w+\s*\([^)]*\)\s*$', stripped_line)):  # Function calls
+                
+                if not stripped_line.endswith(';'):
+                    self.errors.append({
+                        "message": "Missing semicolon",
+                        "severity": "error",
+                        "line": line_num,
+                        "column": len(stripped_line) + 1
+                    })
+    
+    def _check_unmatched_braces(self):
+        """Check for unmatched braces"""
+        open_braces = 0
+        lines = self.code.split('\n')
+        
+        for line_num, line in enumerate(lines, 1):
+            for char_num, char in enumerate(line, 1):
+                if char == '{':
+                    open_braces += 1
+                elif char == '}':
+                    open_braces -= 1
+                    if open_braces < 0:
+                        self.errors.append({
+                            "message": "Unmatched closing brace",
+                            "severity": "error",
+                            "line": line_num,
+                            "column": char_num
+                        })
+        
+        if open_braces > 0:
+            self.errors.append({
+                "message": f"Unmatched opening brace(s): {open_braces}",
+                "severity": "error",
+                "line": len(lines),
+                "column": 1
+            })
+    
+    def _check_incomplete_statements(self):
+        """Check for incomplete statements"""
+        lines = self.code.split('\n')
+        for line_num, line in enumerate(lines, 1):
+            stripped_line = line.strip()
+            
+            # Check for incomplete function calls
+            if re.search(r'\w+\s*\([^)]*$', stripped_line):
+                self.errors.append({
+                    "message": "Incomplete function call - missing closing parenthesis",
+                    "severity": "error",
+                    "line": line_num,
+                    "column": len(stripped_line) + 1
+                })
+            
+            # Check for incomplete string literals
+            if stripped_line.count('"') % 2 != 0:
+                self.errors.append({
+                    "message": "Unmatched string literal",
+                    "severity": "error",
+                    "line": line_num,
+                    "column": stripped_line.find('"') + 1
+                })
     
     def _validate_semantics(self):
         """Basic semantic validation"""

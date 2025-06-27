@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image
 import io
 
-from .gl_context import GLContextManager, OpenGLContextError, get_global_context
+from .gl_context import GLContextManager, OpenGLContextError, get_global_context, OPENGL_AVAILABLE
 
 logger = logging.getLogger(__name__)
 

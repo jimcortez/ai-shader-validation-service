@@ -104,6 +104,8 @@ class MadMapperParser:
         try:
             # Extract metadata from comments
             metadata = self._extract_metadata(madmapper_code)
+            if "name" not in metadata:
+                raise ValueError("Missing @name in MadMapper shader")
             
             # Extract shader code sections
             vertex_shader = self._extract_shader_section(madmapper_code, "VERTEX_SHADER")

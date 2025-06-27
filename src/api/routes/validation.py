@@ -23,7 +23,7 @@ from ...database.connection import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, asc
 
-router = APIRouter(prefix="/api/v1", tags=["validation"])
+router = APIRouter(tags=["validation"])
 
 
 @router.post("/validate", response_model=ValidationResult)

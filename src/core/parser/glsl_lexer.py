@@ -28,6 +28,8 @@ GLSL_GRAMMAR = """
     
     declarator: IDENTIFIER ("[" expression "]")* ("=" initializer)?
     
+    initializer: assignment_expression
+    
     expression_statement: expression ";"
     
     expression: assignment_expression

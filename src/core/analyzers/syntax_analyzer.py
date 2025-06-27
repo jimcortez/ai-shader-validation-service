@@ -62,18 +62,51 @@ class SyntaxAnalyzer:
         lines = code.split('\n')
         for line_num, line in enumerate(lines, 1):
             stripped = line.strip()
-            if (stripped and not stripped.endswith(';') and 
-                not stripped.endswith('{') and not stripped.endswith('}') and
-                not stripped.startswith('#') and not stripped.startswith('//') and
-                not stripped.startswith('/*') and not stripped.startswith('*') and
-                not stripped.startswith('if') and not stripped.startswith('for') and
-                not stripped.startswith('while') and not stripped.startswith('else')):
-                self.warnings.append({
-                    "message": "Possible missing semicolon",
-                    "line": line_num,
-                    "column": len(line),
-                    "severity": "warning"
-                })
+            
+            # Skip empty lines, comments, and control structures
+            if (not stripped or 
+                stripped.startswith('#') or 
+                stripped.startswith('//') or 
+                stripped.startswith('/*') or 
+                stripped.startswith('*') or
+                stripped.endswith('{') or 
+                stripped.endswith('}') or
+                stripped.startswith('if') or 
+                stripped.startswith('for') or
+                stripped.startswith('while') or 
+                stripped.startswith('else') or
+                stripped.startswith('void') or
+                stripped.startswith('uniform') or
+                stripped.startswith('attribute') or
+                stripped.startswith('varying') or
+                stripped.startswith('in') or
+                stripped.startswith('out')):
+                continue
+            
+            # Check for statements that should end with semicolon
+            # Look for assignment statements, function calls, etc.
+            if (('=' in stripped and not stripped.endswith(';')) or
+                ('(' in stripped and ')' in stripped and not stripped.endswith(';') and not stripped.endswith('{')) or
+                (any(keyword in stripped for keyword in ['vec4', 'vec3', 'vec2', 'float', 'int', 'bool']) and 
+                 '=' in stripped and not stripped.endswith(';'))):
+                
+                # Additional check: if line ends with a comment, check if the statement before it ends with semicolon
+                if '//' in stripped:
+                    statement_part = stripped.split('//')[0].strip()
+                    if statement_part and not statement_part.endswith(';'):
+                        self.errors.append({
+                            "message": "Missing semicolon at end of statement",
+                            "line": line_num,
+                            "column": len(line),
+                            "severity": "error"
+                        })
+                else:
+                    self.errors.append({
+                        "message": "Missing semicolon at end of statement",
+                        "line": line_num,
+                        "column": len(line),
+                        "severity": "error"
+                    })
     
     def _check_parentheses(self, code: str):
         """Check for balanced parentheses"""
