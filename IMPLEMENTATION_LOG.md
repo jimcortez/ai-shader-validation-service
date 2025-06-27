@@ -41,4 +41,43 @@ This log documents the implementation process, summarizing user prompts, require
 - Added configuration and logging scaffolding (src/config/settings.py, src/config/logging.py, and environment configs).
 - Verified that the Docker container builds and runs, and the health check endpoint responds as expected.
 
+---
+
+## Step 2: Core API Framework
+
+**User Prompts & Requirements:**
+- User requested to proceed with Step 2 of the implementation plan.
+
+**Deviations from Plan:**
+- FastAPI middleware classes (logging and rate limiting) needed to be implemented as ASGI-compatible classes with __init__(app) and __call__ methods, not as callables with (request, call_next). Fixed both middleware accordingly.
+- Added PyJWT to requirements for authentication middleware (not originally listed).
+- Fixed a duplicate field name in the VisualizationRequest model.
+- Added a /api/v1/config endpoint for configuration inspection.
+
+**What Was Implemented:**
+- Created authentication, rate limiting, and logging middleware (ASGI-compatible).
+- Created Pydantic request and response models for validation, analysis, visualization, and ISF endpoints.
+- Created error models and exception handlers for robust error handling.
+- Updated the main FastAPI app to include all middleware, exception handlers, and enhanced configuration management.
+- Rebuilt and tested the Docker container; verified the health endpoint works and the app starts with all middleware and error handling in place.
+
+---
+
+## Step 3: Database Layer & Models
+
+**User Prompts & Requirements:**
+- User requested to proceed with Step 3 of the implementation plan.
+
+**Deviations from Plan:**
+- Alembic was not available in the local environment, so migration setup was noted for Docker/container use.
+- The database health check required SQLAlchemy's text() for raw SQL execution.
+- The database initialization script had to be run as a module (python -m src.database.init) in Docker due to import paths.
+
+**What Was Implemented:**
+- Created SQLAlchemy models for shaders, validation_results, analysis_results, and generated_images.
+- Implemented database connection management with sessionmaker and scoped_session.
+- Added a database initialization script to create all tables.
+- Added a health check endpoint for database connectivity and integrated it into the API.
+- Verified database health and initialization in the running Docker container.
+
 --- 
