@@ -1,0 +1,47 @@
+// @name Test MadMapper Shader
+// @description A simple test MadMapper shader for validation testing
+// @author AI ShaderMaker
+// @version 1.0.0
+// @category Test
+
+// @param color color label:"Color" desc:"The color to display"
+// @param intensity float min:0.0 max:2.0 label:"Intensity" desc:"Color intensity multiplier"
+// @param enable_effect bool label:"Enable Effect" desc:"Enable or disable the effect"
+
+// @input texture inputTexture
+// @output vec4 outputColor
+
+// VERTEX_SHADER
+#version 330
+
+in vec3 position;
+in vec2 texCoord;
+
+out vec2 vTexCoord;
+
+void main() {
+    gl_Position = vec4(position, 1.0);
+    vTexCoord = texCoord;
+}
+
+// FRAGMENT_SHADER
+#version 330
+
+uniform vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
+uniform float intensity = 1.0;
+uniform bool enable_effect = true;
+uniform sampler2D inputTexture;
+
+in vec2 vTexCoord;
+out vec4 gl_FragColor;
+
+void main() {
+    vec4 texColor = texture(inputTexture, vTexCoord);
+    vec4 finalColor = color;
+    
+    if (enable_effect) {
+        finalColor.rgb *= intensity;
+    }
+    
+    gl_FragColor = mix(texColor, finalColor, 0.5);
+} 

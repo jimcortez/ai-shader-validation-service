@@ -4,12 +4,14 @@ Validation service orchestration
 from src.core.validator import ValidationEngine
 from src.core.parser.glsl_parser import GLSLParser
 from src.core.parsers.isf_parser import ISFParser
+from src.core.parsers.madmapper_parser import MadMapperParser
 from src.core.analyzers.logic_analyzer import LogicFlowAnalyzer, DataFlowAnalyzer, MathematicalValidator
 from src.core.analyzers.portability_analyzer import PortabilityAnalyzer, CrossPlatformValidator
 from src.core.analyzers.quality_analyzer import QualityAnalyzer
 from src.core.analyzers.syntax_analyzer import SyntaxAnalyzer
 from src.core.analyzers.semantic_analyzer import SemanticAnalyzer
 from src.core.analyzers.isf_analyzer import ISFAnalyzer
+from src.core.analyzers.madmapper_analyzer import MadMapperAnalyzer
 from src.core.utils.gl_utils import GLVersionDetector, GLSLFeatureChecker, GLPlatformUtils
 from src.core.models.errors import ValidationResult, ValidationError, ErrorSeverity
 from typing import Dict, Any, Optional, List
@@ -32,10 +34,12 @@ class ValidationService:
         self.cross_platform_validator = CrossPlatformValidator()
         self.quality_analyzer = QualityAnalyzer()
         self.isf_analyzer = ISFAnalyzer()
+        self.madmapper_analyzer = MadMapperAnalyzer()
         
         # Initialize parsers
         self.glsl_parser = GLSLParser("")
         self.isf_parser = ISFParser()
+        self.madmapper_parser = MadMapperParser()
         
         # Initialize GL utilities
         self.version_detector = GLVersionDetector()
@@ -74,6 +78,8 @@ class ValidationService:
                 result = self._validate_glsl(code, result, parameters)
             elif format_name.lower() == "isf":
                 result = self._validate_isf(code, result, parameters)
+            elif format_name.lower() == "madmapper":
+                result = self._validate_madmapper(code, result, parameters)
             else:
                 # For other formats, use the validation engine
                 engine_result = self.engine.validate_shader(code, format_name, parameters)
@@ -213,6 +219,103 @@ class ValidationService:
                 "column": 0,
                 "severity": "error",
                 "error_code": "ISF_VALIDATION_ERROR"
+            })
+        
+        return result
+    
+    def _validate_madmapper(self, madmapper_code: str, result: Dict[str, Any], parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate MadMapper shader."""
+        try:
+            # Perform MadMapper-specific analysis
+            madmapper_result = self.madmapper_analyzer.analyze(madmapper_code)
+            
+            # Convert MadMapper validation errors to our format
+            for error in madmapper_result.get("errors", []):
+                result["errors"].append({
+                    "message": error.message,
+                    "line": error.line,
+                    "column": error.column,
+                    "severity": error.severity.value,
+                    "error_code": error.error_code,
+                    "suggestions": error.suggestions
+                })
+            
+            for warning in madmapper_result.get("warnings", []):
+                result["warnings"].append({
+                    "message": warning.message,
+                    "line": warning.line,
+                    "column": warning.column,
+                    "severity": warning.severity.value,
+                    "error_code": warning.error_code,
+                    "suggestions": warning.suggestions
+                })
+            
+            # Add MadMapper metadata
+            if "metadata" in madmapper_result and "parsed_document" in madmapper_result["metadata"]:
+                madmapper_doc = madmapper_result["metadata"]["parsed_document"]
+                result["metadata"] = {
+                    "name": madmapper_doc.name,
+                    "description": madmapper_doc.description,
+                    "author": madmapper_doc.author,
+                    "version": madmapper_doc.version,
+                    "category": madmapper_doc.category,
+                    "parameters": [{
+                        "name": param.name,
+                        "type": param.type.value,
+                        "default_value": param.default_value,
+                        "group": param.group
+                    } for param in (madmapper_doc.parameters or [])],
+                    "inputs": [{
+                        "name": input_obj.name,
+                        "type": input_obj.type,
+                        "description": input_obj.description
+                    } for input_obj in (madmapper_doc.inputs or [])],
+                    "outputs": [{
+                        "name": output_obj.name,
+                        "type": output_obj.type,
+                        "description": output_obj.description
+                    } for output_obj in (madmapper_doc.outputs or [])]
+                }
+            
+            # If MadMapper has fragment shader, also validate it as GLSL
+            if (madmapper_result.get("metadata", {}).get("parsed_document") and 
+                madmapper_result["metadata"]["parsed_document"].fragment_shader):
+                
+                fragment_shader = madmapper_result["metadata"]["parsed_document"].fragment_shader
+                glsl_result = self._validate_glsl(fragment_shader, {
+                    "is_valid": True,
+                    "format": "glsl",
+                    "errors": [],
+                    "warnings": [],
+                    "info": []
+                }, parameters)
+                
+                # Merge GLSL validation results
+                result["errors"].extend(glsl_result["errors"])
+                result["warnings"].extend(glsl_result["warnings"])
+                result["info"].extend(glsl_result["info"])
+                
+                if "quality_metrics" in glsl_result:
+                    result["quality_metrics"].update(glsl_result["quality_metrics"])
+                
+                if "performance_analysis" in glsl_result:
+                    result["performance_analysis"].update(glsl_result["performance_analysis"])
+            
+            # Check for any critical errors
+            if result["errors"]:
+                result["is_valid"] = False
+            
+            # Generate MadMapper-specific recommendations
+            result["recommendations"] = self._generate_madmapper_recommendations(madmapper_result)
+            
+        except Exception as e:
+            result["is_valid"] = False
+            result["errors"].append({
+                "message": f"MadMapper validation failed: {str(e)}",
+                "line": 0,
+                "column": 0,
+                "severity": "error",
+                "error_code": "MADMAPPER_VALIDATION_ERROR"
             })
         
         return result
@@ -478,6 +581,38 @@ class ValidationService:
             recommendations.append("Fix validation errors before using the shader")
         
         if isf_result.get("warnings"):
+            recommendations.append("Review warnings to improve shader quality")
+        
+        return recommendations
+    
+    def _generate_madmapper_recommendations(self, madmapper_result: Dict[str, Any]) -> List[str]:
+        """Generate MadMapper-specific recommendations."""
+        recommendations = []
+        
+        # Check for missing metadata
+        if "metadata" in madmapper_result and "parsed_document" in madmapper_result["metadata"]:
+            madmapper_doc = madmapper_result["metadata"]["parsed_document"]
+            
+            if not madmapper_doc.description:
+                recommendations.append("Add a description to help users understand the shader")
+            
+            if not madmapper_doc.author:
+                recommendations.append("Add author information for attribution")
+            
+            if not madmapper_doc.category:
+                recommendations.append("Add a category to help users find the shader")
+            
+            if not madmapper_doc.version:
+                recommendations.append("Add version information for tracking changes")
+            
+            if not madmapper_doc.parameters:
+                recommendations.append("Consider adding parameters to make the shader more interactive")
+        
+        # Check for validation issues
+        if madmapper_result.get("errors"):
+            recommendations.append("Fix validation errors before using the shader")
+        
+        if madmapper_result.get("warnings"):
             recommendations.append("Review warnings to improve shader quality")
         
         return recommendations
