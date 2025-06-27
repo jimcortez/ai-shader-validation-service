@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     port: int = 8000
     reload: bool = True
     
-    # Database
+    # Database - Use SQLite for development by default
     database_url: str = "sqlite:///./storage/shader_validator.db"
     
     # Storage

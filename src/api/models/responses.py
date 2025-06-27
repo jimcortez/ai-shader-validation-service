@@ -54,6 +54,7 @@ class ValidationResult(BaseModel):
     portability_issues: List["PortabilityIssue"] = Field(default_factory=list, description="Portability issues")
     
     # Metadata
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Shader metadata (e.g., ISF parameters, author, etc.)")
     created_at: datetime = Field(..., description="Validation timestamp")
     processing_time_ms: float = Field(..., description="Processing time in milliseconds")
     recommendations: List[str] = Field(default_factory=list, description="Overall recommendations")

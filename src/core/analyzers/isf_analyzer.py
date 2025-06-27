@@ -5,7 +5,9 @@ ISF (Interactive Shader Format) Analyzer
 import logging
 from typing import Dict, Any, List, Optional
 from ..parsers.isf_parser import ISFParser, ISFDocument, ISFParameter
+from ..parser.glsl_parser import GLSLParser
 from ..models.errors import ValidationError, ErrorSeverity
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -290,36 +292,84 @@ class ISFAnalyzer:
             return False
     
     def _check_glsl_syntax(self, shader_code: str) -> tuple[List[ValidationError], List[ValidationError]]:
-        """Basic GLSL syntax checking."""
+        """Check GLSL syntax using basic validation for ISF shaders."""
         errors = []
         warnings = []
         
-        lines = shader_code.split('\n')
-        
-        for i, line in enumerate(lines, 1):
-            # Check for unmatched braces
-            open_braces = line.count('{')
-            close_braces = line.count('}')
+        try:
+            # Basic GLSL validation without overly strict syntax checking
+            # Since ISF shaders are known to work in other validators, we'll be lenient
             
-            if open_braces != close_braces:
+            # Check for empty shader
+            if not shader_code.strip():
+                errors.append(ValidationError(
+                    message="Empty shader code",
+                    severity=ErrorSeverity.ERROR,
+                    line=0,
+                    column=0,
+                    error_code="GLSL_SYNTAX_ERROR",
+                    suggestions=["Add shader code"]
+                ))
+                return errors, warnings
+            
+            # Check for basic GLSL structure (main function)
+            if 'void main()' not in shader_code and 'void main (' not in shader_code:
                 warnings.append(ValidationError(
-                    message=f"Potential brace mismatch on line {i}",
+                    message="No main function found",
                     severity=ErrorSeverity.WARNING,
-                    line=i,
+                    line=0,
                     column=0,
                     error_code="GLSL_SYNTAX_WARNING",
-                    suggestions=["Check for unmatched braces"]
+                    suggestions=["Add void main() function"]
                 ))
             
-            # Check for common GLSL keywords
-            if 'main()' in line and 'void' not in line:
+            # Check for version directive (optional for ISF)
+            if not re.search(r'#version\s+\d+', shader_code):
                 warnings.append(ValidationError(
-                    message=f"Main function should be declared as 'void main()' on line {i}",
+                    message="No version directive found",
                     severity=ErrorSeverity.WARNING,
-                    line=i,
+                    line=0,
                     column=0,
                     error_code="GLSL_SYNTAX_WARNING",
-                    suggestions=["Use 'void main()' declaration"]
+                    suggestions=["Review GLSL code"]
                 ))
+            
+            # Basic brace matching check
+            open_braces = 0
+            for char in shader_code:
+                if char == '{':
+                    open_braces += 1
+                elif char == '}':
+                    open_braces -= 1
+                    if open_braces < 0:
+                        errors.append(ValidationError(
+                            message="Unmatched closing brace",
+                            severity=ErrorSeverity.ERROR,
+                            line=0,
+                            column=0,
+                            error_code="GLSL_SYNTAX_ERROR",
+                            suggestions=["Check brace matching"]
+                        ))
+                        break
+            
+            if open_braces > 0:
+                errors.append(ValidationError(
+                    message="Unmatched opening brace",
+                    severity=ErrorSeverity.ERROR,
+                    line=0,
+                    column=0,
+                    error_code="GLSL_SYNTAX_ERROR",
+                    suggestions=["Check brace matching"]
+                ))
+            
+        except Exception as e:
+            errors.append(ValidationError(
+                message=f"GLSL syntax analysis failed: {str(e)}",
+                severity=ErrorSeverity.ERROR,
+                line=0,
+                column=0,
+                error_code="GLSL_ANALYSIS_ERROR",
+                suggestions=["Check GLSL code structure"]
+            ))
         
         return errors, warnings 

@@ -58,6 +58,14 @@ def sample_isf_shader() -> dict:
 
 
 @pytest.fixture
+def spherical_eye_shader() -> str:
+    """Provide the SphericalEye ISF shader for testing."""
+    fixture_path = Path(__file__).parent / "fixtures" / "shaders" / "spherical_eye.fs"
+    with open(fixture_path, 'r') as f:
+        return f.read()
+
+
+@pytest.fixture
 def sample_madmapper_shader() -> str:
     """Provide a sample MadMapper shader for testing."""
     fixture_path = Path(__file__).parent / "fixtures" / "shaders" / "test_madmapper_shader.mad"

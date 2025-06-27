@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from typing import Union
 from src.api.models.responses import ErrorResponse
 from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 class ValidationException(HTTPException):
     """Custom exception for validation errors"""
@@ -42,60 +43,60 @@ async def validation_exception_handler(request: Request, exc: ValidationExceptio
     """Handler for validation exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(
+        content=jsonable_encoder(ErrorResponse(
             error="Validation Error",
             detail=exc.detail,
             code="VALIDATION_ERROR",
             timestamp=datetime.utcnow()
-        ).model_dump()
+        ))
     )
 
 async def shader_parse_exception_handler(request: Request, exc: ShaderParseException):
     """Handler for shader parsing exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(
+        content=jsonable_encoder(ErrorResponse(
             error="Shader Parse Error",
             detail=exc.detail,
             code="SHADER_PARSE_ERROR",
             timestamp=datetime.utcnow()
-        ).model_dump()
+        ))
     )
 
 async def processing_exception_handler(request: Request, exc: ProcessingException):
     """Handler for processing exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(
+        content=jsonable_encoder(ErrorResponse(
             error="Processing Error",
             detail=exc.detail,
             code="PROCESSING_ERROR",
             timestamp=datetime.utcnow()
-        ).model_dump()
+        ))
     )
 
 async def resource_not_found_exception_handler(request: Request, exc: ResourceNotFoundException):
     """Handler for resource not found exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(
+        content=jsonable_encoder(ErrorResponse(
             error="Resource Not Found",
             detail=exc.detail,
             code="RESOURCE_NOT_FOUND",
             timestamp=datetime.utcnow()
-        ).model_dump()
+        ))
     )
 
 async def rate_limit_exception_handler(request: Request, exc: RateLimitException):
     """Handler for rate limit exceptions"""
     return JSONResponse(
         status_code=exc.status_code,
-        content=ErrorResponse(
+        content=jsonable_encoder(ErrorResponse(
             error="Rate Limit Exceeded",
             detail=exc.detail,
             code="RATE_LIMIT_EXCEEDED",
             timestamp=datetime.utcnow()
-        ).model_dump(),
+        )),
         headers={"Retry-After": "60"}
     )
 
@@ -103,10 +104,10 @@ async def general_exception_handler(request: Request, exc: Exception):
     """Handler for general exceptions"""
     return JSONResponse(
         status_code=500,
-        content=ErrorResponse(
+        content=jsonable_encoder(ErrorResponse(
             error="Internal Server Error",
             detail="An unexpected error occurred",
             code="INTERNAL_ERROR",
             timestamp=datetime.utcnow()
-        ).model_dump()
+        ))
     ) 

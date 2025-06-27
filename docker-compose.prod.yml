@@ -6,7 +6,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: production
     image: ai-shadervalidator:latest
     container_name: ai-shadervalidator-app
     restart: unless-stopped

@@ -4,6 +4,7 @@ ISF (Interactive Shader Format) Parser
 
 import json
 import logging
+import re
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
@@ -83,7 +84,103 @@ class ISFParser:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
     
-    def parse(self, isf_json: str) -> ISFDocument:
+    def parse(self, isf_content: str) -> ISFDocument:
+        """
+        Parse ISF content and return an ISFDocument.
+        Automatically detects if the content is pure JSON or .fs format.
+        
+        Args:
+            isf_content: ISF content (JSON or .fs file content)
+            
+        Returns:
+            Parsed ISFDocument
+            
+        Raises:
+            ValueError: If ISF content is invalid
+        """
+        # Check if this looks like a .fs file (contains /*{ and }*/)
+        if "/*{" in isf_content and "}*/" in isf_content:
+            return self.parse_fs_file(isf_content)
+        else:
+            # Assume it's pure JSON
+            return self.parse_json(isf_content)
+    
+    def parse_fs_file(self, fs_content: str) -> ISFDocument:
+        """
+        Parse ISF .fs file that contains JSON metadata in comments and GLSL code.
+        
+        Args:
+            fs_content: .fs file content
+            
+        Returns:
+            Parsed ISFDocument
+            
+        Raises:
+            ValueError: If .fs file is invalid
+        """
+        # Extract everything between /* and */ (robustly)
+        block_match = re.search(r'/\*([\s\S]*?)\*/', fs_content)
+        if not block_match:
+            raise ValueError("No ISF metadata found in .fs file (missing /* ... */)")
+        block = block_match.group(1).strip()
+        # Find the first { and last } inside the block
+        start = block.find('{')
+        end = block.rfind('}')
+        if start == -1 or end == -1 or end <= start:
+            raise ValueError("No valid JSON object found in ISF metadata block")
+        json_str = block[start:end+1]
+        
+        # Extract GLSL code (everything after the closing */)
+        code_match = re.search(r'\*/([\s\S]*)$', fs_content)
+        if code_match:
+            glsl_code = code_match.group(1).strip()
+        else:
+            glsl_code = ""
+        
+        # Parse the JSON metadata
+        try:
+            metadata = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in ISF metadata: {e}")
+        
+        # Extract basic metadata
+        name = metadata.get("NAME", "Unnamed Shader")
+        description = metadata.get("DESCRIPTION")
+        author = metadata.get("AUTHOR")
+        version = metadata.get("VERSION")
+        categories = metadata.get("CATEGORIES", [])
+        license = metadata.get("LICENSE")
+        credits = metadata.get("CREDITS")
+        
+        # Parse inputs
+        inputs = self._parse_inputs(metadata.get("INPUTS", []))
+        
+        # Parse parameters
+        parameters = self._parse_parameters(metadata.get("INPUTS", []))
+        
+        # Parse passes
+        passes = self._parse_passes(metadata.get("PASSES", []))
+        
+        # Use the extracted GLSL code as fragment shader
+        fragment_shader = glsl_code
+        vertex_shader = metadata.get("VERTEX_SHADER")
+        
+        return ISFDocument(
+            name=name,
+            description=description,
+            author=author,
+            version=version,
+            categories=categories,
+            inputs=inputs,
+            parameters=parameters,
+            passes=passes,
+            fragment_shader=fragment_shader,
+            vertex_shader=vertex_shader,
+            license=license,
+            credits=credits
+        )
+    
+    def parse_json(self, isf_json: str) -> ISFDocument:
         """
         Parse ISF JSON and return an ISFDocument.
         
@@ -225,29 +322,51 @@ class ISFParser:
         
         return type_mapping[isf_type]
     
-    def validate_structure(self, isf_json: str) -> List[str]:
+    def validate_structure(self, isf_content: str) -> List[str]:
         """
-        Validate ISF JSON structure and return list of errors.
+        Validate ISF content structure and return list of errors.
+        Automatically detects if the content is pure JSON or .fs format.
         
         Args:
-            isf_json: ISF JSON string
+            isf_content: ISF content (JSON or .fs file content)
             
         Returns:
             List of validation errors
         """
         errors = []
         
+        # Check if this looks like a .fs file (contains /* and */)
+        if "/*" in isf_content and "*/" in isf_content:
+            # Extract everything between /* and */
+            block_match = re.search(r'/\*([\s\S]*?)\*/', isf_content)
+            if not block_match:
+                errors.append("No ISF metadata found in .fs file (missing /* ... */)")
+                return errors
+            block = block_match.group(1).strip()
+            # Find the first { and last } inside the block
+            start = block.find('{')
+            end = block.rfind('}')
+            if start == -1 or end == -1 or end <= start:
+                errors.append("No valid JSON object found in ISF metadata block")
+                return errors
+            json_str = block[start:end+1]
+            # Extract GLSL code (everything after the closing */)
+            code_match = re.search(r'\*/([\s\S]*)$', isf_content)
+            if not code_match or not code_match.group(1).strip():
+                errors.append("No GLSL code found after ISF metadata")
+        else:
+            # Assume it's pure JSON
+            json_str = isf_content
+        
+        # Validate JSON structure
         try:
-            data = json.loads(isf_json)
+            data = json.loads(json_str)
         except json.JSONDecodeError as e:
             errors.append(f"Invalid JSON: {e}")
             return errors
         
-        # Check required fields
-        if "NAME" not in data:
-            errors.append("Missing required field: NAME")
-        
-        if "FRAGMENT_SHADER" not in data:
+        # For .fs files, FRAGMENT_SHADER is not required in JSON since it's in the code
+        if "/*" not in isf_content and "FRAGMENT_SHADER" not in data:
             errors.append("Missing required field: FRAGMENT_SHADER")
         
         # Validate inputs
@@ -269,4 +388,38 @@ class ISFParser:
             if not isinstance(pass_data, dict):
                 errors.append(f"Pass {i} must be an object")
         
-        return errors 
+        return errors
+    
+    def extract_json_from_fs(self, fs_content: str) -> str:
+        """
+        Extract JSON metadata from .fs file.
+        
+        Args:
+            fs_content: .fs file content
+            
+        Returns:
+            JSON string extracted from comments
+            
+        Raises:
+            ValueError: If no JSON metadata found
+        """
+        json_match = re.search(r'/\*\{([\s\S]*?)\}\*/', fs_content)
+        if not json_match:
+            raise ValueError("No ISF metadata found in .fs file (missing /*{ ... }*/)")
+        
+        return json_match.group(1)
+    
+    def extract_glsl_from_fs(self, fs_content: str) -> str:
+        """
+        Extract GLSL code from .fs file.
+        
+        Args:
+            fs_content: .fs file content
+            
+        Returns:
+            GLSL code string
+        """
+        code_match = re.search(r'\}\*/([\s\S]*)$', fs_content)
+        if code_match:
+            return code_match.group(1).strip()
+        return "" 

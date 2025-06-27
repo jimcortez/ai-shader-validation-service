@@ -97,6 +97,7 @@ async def validate_shader(
             quality_metrics=validation_result.get("quality_metrics"),
             performance_analysis=_create_performance_analysis(validation_result),
             portability_issues=_create_portability_issues(validation_result.get("portability_issues", [])),
+            metadata=validation_result.get("metadata"),
             created_at=datetime.utcnow(),
             processing_time_ms=processing_time,
             recommendations=validation_result.get("recommendations", [])
@@ -217,6 +218,7 @@ async def validate_shaders_batch(
                 quality_metrics=result.get("quality_metrics"),
                 performance_analysis=_create_performance_analysis(result),
                 portability_issues=_create_portability_issues(result.get("portability_issues", [])),
+                metadata=result.get("metadata"),
                 created_at=datetime.utcnow(),
                 processing_time_ms=result.get("processing_time_ms", 0),
                 recommendations=result.get("recommendations", [])
