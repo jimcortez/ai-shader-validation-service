@@ -1,3 +1,5 @@
+This was a failed experiment. Look for an alternative flow in my ai-shader-tool repo as well as pyvvisf
+
 # AI Shader Validation Tool
 
 A comprehensive tool designed to enable AI systems (like Cursor.ai) to validate, analyze, and self-correct shader code across multiple formats including GLSL, ISF (Interactive Shader Format), MadMapper, and other shader variants.
